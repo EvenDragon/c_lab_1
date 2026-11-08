@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include "tokens.h"
 
 bool implication(bool a, bool b)
 {
@@ -21,22 +22,20 @@ bool nand(bool a, bool b)
     return !(a && b);
 }
 
+bool expression(bool a, bool b, bool c)
+{
+    return (implication(a,b) && implication(b,c));
+}
+
 
 int main(void)
 {
-    printf("a b | impl xor nor nand\n");
-    for (int a = 0; a < 2; a++)
-    {
-        for (int b = 0; b < 2; b++)
-        {
-            printf("%d %d | %d    %d   %d   %d\n", a, b, implication(a,b), exclusive_or(a,b),
-                                    nor(a,b), nand(a,b));
+        const char *input = "abc";
+        int index = 1;
+        int position = index;
 
-        }
-        
-    }
-    
-    
-
+        printf("%c\n", input[position]);
+        (position)++;
+        printf("%c\n", input[position]);
     return 0;
 }
