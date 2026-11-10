@@ -214,7 +214,7 @@ void make_table(char vars[], int vars_count, char arr[], int arr_count)
     else
         sdnf[strlen(sdnf)-1] = '\0';
     if (strlen(scnf)==0)
-        strcat(sdnf, "1");
+        strcat(scnf, "1");
     else
         scnf[strlen(scnf)-1] = '\0';
     printf("\nSDNF: %s", sdnf);
