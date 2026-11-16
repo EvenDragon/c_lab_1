@@ -8,7 +8,7 @@
 #include "functions.c"
 #define MAX_FORMULA_L 100
 #define MAX_VARS 20
-#define PATH "test.txt"
+#define PATH "test3.txt"
 
 int define_priority(char op)
 {
@@ -196,7 +196,7 @@ void fictional_vars(int vars_count, int table[][vars_count + 1], int row_count, 
 
 char *replace_operation(char *a, char *b, char operation, char basis)
 {
-    size_t length = strlen(a) + strlen(b);
+    int length = strlen(a) + strlen(b);
     char *result = malloc(2 * length + 16);
 
     if (basis == '~' && operation == '&')
@@ -214,120 +214,9 @@ char *replace_operation(char *a, char *b, char operation, char basis)
     return result;
 }
 
-void simplify_sdnf(char *sdnf)
-{
-    if (sdnf[0] != '(')
-        return;
-
-    int count = 0;
-    for (int i = 0; sdnf[i] != '\0'; i++)
-        if (sdnf[i] == '(')
-            count++;
-
-    char (*terms)[MAX_VARS + 1] = malloc(count * sizeof(*terms));
-    char vars[MAX_VARS];
-    int vars_count = 0;
-    int term = 0;
-    for (int i = 0; sdnf[i] != '\0'; i++)
-    {
-        if (sdnf[i] != '(')
-            continue;
-        int pos = 0;
-        for (i++; sdnf[i] != ')'; i++)
-        {
-            if (sdnf[i] == '&')
-                continue;
-            char value = '1';
-            if (sdnf[i] == '!')
-            {
-                value = '0';
-                i++;
-            }
-            vars[pos] = sdnf[i];
-            terms[term][pos++] = value;
-        }
-        terms[term++][pos] = '\0';
-        vars_count = pos;
-    }
-
-    bool changed = true;
-    while (changed)
-    {
-        changed = false;
-        for (int i = 0; i < count && !changed; i++)
-        {
-            if (terms[i][0] == '\0')
-                continue;
-            for (int j = i + 1; j < count && !changed; j++)
-            {
-                if (terms[j][0] == '\0')
-                    continue;
-                int differences = 0;
-                int position = 0;
-                for (int k = 0; k < vars_count; k++)
-                {
-                    if (terms[i][k] == terms[j][k])
-                        continue;
-                    if (terms[i][k] == '-' || terms[j][k] == '-')
-                    {
-                        differences = 2;
-                        break;
-                    }
-                    differences++;
-                    position = k;
-                }
-                if (differences == 1)
-                {
-                    terms[i][position] = '-';
-                    terms[j][0] = '\0';
-                    changed = true;
-                }
-            }
-        }
-    }
-
-    int pos = 0;
-    int remaining = 0;
-    for (int i = 0; i < count; i++)
-    {
-        if (terms[i][0] == '\0')
-            continue;
-        if (remaining > 0)
-            sdnf[pos++] = '+';
-        sdnf[pos++] = '(';
-        int literals = 0;
-        for (int j = 0; j < vars_count; j++)
-        {
-            if (terms[i][j] == '-')
-                continue;
-            if (literals > 0)
-                sdnf[pos++] = '&';
-            if (terms[i][j] == '0')
-                sdnf[pos++] = '!';
-            sdnf[pos++] = vars[j];
-            literals++;
-        }
-        if (literals == 0)
-        {
-            strcpy(sdnf, "1");
-            free(terms);
-            return;
-        }
-        sdnf[pos++] = ')';
-        remaining++;
-    }
-    sdnf[pos] = '\0';
-    if (remaining == 1)
-    {
-        memmove(sdnf, sdnf + 1, pos - 2);
-        sdnf[pos - 2] = '\0';
-    }
-    free(terms);
-}
 
 void seven_task(char *sdnf)
 {
-    simplify_sdnf(sdnf);
     printf("\nBasis {&, +, !}: %s\n", sdnf);
     char bases[] = {'~', '|', '^'};
     for (int k = 0; k < 3; k++)
@@ -412,11 +301,17 @@ void make_table(char vars[], int vars_count, char arr[], int arr_count)
     scnf[0] = '\0';
     recursive(values, 0, vars,vars_count, arr, arr_count,sdnf,scnf, table, &row_count);
     if (strlen(sdnf)==0)
+    {
         strcat(sdnf, "0");
+        printf("sdnf is 0, because it was zero 1 results");
+    }
     else
         sdnf[strlen(sdnf)-1] = '\0';
     if (strlen(scnf)==0)
+    {
         strcat(scnf, "1");
+        printf("scnf is 1, because it was zero 0 results");
+    }
     else
         scnf[strlen(scnf)-1] = '\0';
     if (vars_count == 0)
